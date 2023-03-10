@@ -23,7 +23,7 @@ class KOF {
                 height: 200,
                 color: "red",
             }),
-        ]
+        ];
     }
 }
 
