@@ -31,6 +31,7 @@ export class Player extends GameObject {
         this.frame_current_cnt = 0;
 
         this.hp = 100;
+        this.$hp = this.root.$kof.find(`.kof-head-hp${this.id}>div`);
     }
 
     start() { // 初始执行一次
@@ -38,11 +39,33 @@ export class Player extends GameObject {
     }
 
     update_move() {
-
         this.vy += this.gracity;
 
         this.x += this.vx * this.timedelta / 1000;
         this.y += this.vy * this.timedelta / 1000;
+
+        /*      给人物增加碰撞体积，但人物会卡住
+        if (this.status !== 3) {
+            let me = this, you = this.root.players[1 - this.id];
+            let r1 = {
+                x1: me.x,
+                y1: me.y,
+                x2: me.x + me.width,
+                y2: me.y + me.height,
+            };
+
+            let r2 = {
+                x1: you.x,
+                y1: you.y,
+                x2: you.x + you.width,
+                y2: you.y + you.height,
+            };
+
+            if (this.id_collision(r1, r2)) {
+                this.x -= this.vx * this.timedelta / 1000;
+                //this.status = 0;
+            }
+    } */
 
         if (this.y > 450) {
             this.y = 450;
@@ -128,9 +151,15 @@ export class Player extends GameObject {
         this.status = 5;
         this.frame_current_cnt = 0;
 
-        this.hp = Math.max(this.hp - 10, 0);
+        console.log(this.$hp);
+        this.hp = Math.max(this.hp - 20, 0);
+
+        this.$hp.animate({
+            width: this.$hp.parent().width() * this.hp / 100
+        })
 
         if (this.hp <= 0) {
+            this.vx = 0; //迁坟
             this.status = 6;
             this.frame_current_cnt = 0;
         }
@@ -170,7 +199,7 @@ export class Player extends GameObject {
 
     update() { // 每一帧执行一次
         this.update_move();
-        //console.log(this.status);
+        console.log(this.status);
         this.update_control();
         this.update_direction();
         this.update_attack();
@@ -179,7 +208,7 @@ export class Player extends GameObject {
     }
 
     render() {
-        /*this.ctx.fillStyle = 'blue';
+        /*dthis.ctx.fillStyle = 'blue';
 
         this.ctx.fillRect(this.x, this.y, this.width, this.height);
 
