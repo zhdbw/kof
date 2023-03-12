@@ -26,9 +26,11 @@ export class Player extends GameObject {
 
         this.pressed_keys = this.root.game_map.controller.pressed_keys;
 
-        this.status = 3; //0: idle, 1: 向前， 2： 向后， 3：跳跃， 4： 攻击， 5： 受击， 6： 死亡
+        this.status = 3; //0: idle, 1: 向前， 2： 向后， 3：跳跃， 4： 攻击， 5： 受击， 6： 死亡,  7:  技能1
         this.animations = new Map();
         this.frame_current_cnt = 0;
+
+        this.attack_cd = 0; //攻击间隔
 
         this.hp = 100;
         this.$hp = this.root.$kof.find(`.kof-head-hp${this.id}>div`);
@@ -83,22 +85,30 @@ export class Player extends GameObject {
     }
 
     update_control() {
-        let w, a, d, attack;
+        let w, a, d, attack, skill1;
         if (this.id === 0) {
             w = this.pressed_keys.has('w');
             a = this.pressed_keys.has('a');
             d = this.pressed_keys.has('d');
             attack = this.pressed_keys.has('j');
+            skill1 = this.pressed_keys.has('k')
         } else {
             w = this.pressed_keys.has('ArrowUp');
             a = this.pressed_keys.has('ArrowLeft');
             d = this.pressed_keys.has('ArrowRight');
             attack = this.pressed_keys.has('1');
+            skill1 = this.pressed_keys.has('2')
         }
 
         if (this.status === 0 || this.status === 1) {
-            if (attack) {
+            if (attack && this.attack_cd === 0) {
+                this.attack_cd = 60;
                 this.status = 4;
+                this.vx = 0;
+                this.frame_current_cnt = 0;
+            } else if (skill1) {
+                this.attack_cd = 60;
+                this.status = 7;
                 this.vx = 0;
                 this.frame_current_cnt = 0;
             } else if (w) {
@@ -128,6 +138,8 @@ export class Player extends GameObject {
 
     update_direction() {
         if (this.status === 6) return; //逝者安息
+
+        if (this.status === 7) return; //禁止瞬移
 
         let players = this.root.players;
         if (players[0] && players[1]) {
@@ -189,8 +201,10 @@ export class Player extends GameObject {
                 x1: you.x,
                 y1: you.y,
                 x2: you.x + you.width,
-                y2: you.x + you.height,
+                y2: you.y + you.height,
             }
+
+            console.log(r1, r2);
             if (this.id_collision(r1, r2)) {
                 you.is_attack()
             }
@@ -205,6 +219,7 @@ export class Player extends GameObject {
         this.update_attack();
         //console.log(this.status);
         this.render();
+
     }
 
     render() {
@@ -268,6 +283,17 @@ export class Player extends GameObject {
             this.frame_current_cnt--;
         }
 
+        if (status === 7 && this.frame_current_cnt === obj.frame_rate * obj.frame_cnt - 1) {
+            if (this.direction > 0) {
+                this.x += 84;
+            } else {
+                this.x -= 84;
+            }
+
+            this.status = 0;
+        }
+
         this.frame_current_cnt++;
+        if (this.attack_cd > 0) this.attack_cd--;
     }
 }

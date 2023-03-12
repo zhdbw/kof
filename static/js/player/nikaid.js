@@ -1,7 +1,7 @@
 import { Player } from '/static/js/player/base.js';
 import { GIF } from '/static/js/utils/gif.js';
 
-export class Kyo extends Player {
+export class Nikaid extends Player {
     constructor(root, info) {
         super(root, info);
 
@@ -10,11 +10,11 @@ export class Kyo extends Player {
 
     init_animations() {
         let outer = this;
-        let offsets = [0, -22, -22, -140, 0, 0, 0, -180];
+        let offsets = [-20, -42, -42, -140, -27, 0, 0, -180];
         for (let i = 0; i < 8; i++) {
             let gif = GIF();
             let image = gif.image;
-            gif.load(`/static/images/player/kyo/${i}.gif`);
+            gif.load(`/static/images/player/nikaid/${i}.gif`);
             this.animations.set(i, {
                 gif: gif,
                 frame_cnt: 0, //动画总图片数
@@ -36,8 +36,8 @@ export class Kyo extends Player {
         }
     }
 
-    /*update_attack() {
-        if (this.status === 4 && this.frame_current_cnt === 17) {
+    update_attack() {
+        if (this.status === 4 && this.frame_current_cnt === 18) {
             let me = this, you = this.root.players[1 - this.id];
             let r1;
             if (this.direction > 0) {
@@ -60,11 +60,12 @@ export class Kyo extends Player {
                 x1: you.x,
                 y1: you.y,
                 x2: you.x + you.width,
-                y2: you.x + you.height,
+                y2: you.y + you.height,
             }
             if (this.id_collision(r1, r2)) {
                 you.is_attack()
             }
         }
-    }*/
+    }
 }
+
