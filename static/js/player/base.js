@@ -1,5 +1,6 @@
 import { GameObject } from '/static/js/game_object/base.js';
 
+
 export class Player extends GameObject {
     constructor(root, info) {
         super();
@@ -26,11 +27,12 @@ export class Player extends GameObject {
 
         this.pressed_keys = this.root.game_map.controller.pressed_keys;
 
-        this.status = 3; //0: idle, 1: 向前， 2： 向后， 3：跳跃， 4： 攻击， 5： 受击， 6： 死亡,  7:  技能1
+        this.status = 3; //0: idle, 1: 向前， 2： 向后， 3：跳跃， 4： 攻击， 5： 受击， 6： 死亡,  7:  技能1,  8:  空中硬d直
         this.animations = new Map();
         this.frame_current_cnt = 0;
 
         this.attack_cd = 0; //攻击间隔
+        //this.stiff = 0; //受击僵直
 
         this.hp = 100;
         this.$hp = this.root.$kof.find(`.kof-head-hp${this.id}>div`);
@@ -158,13 +160,15 @@ export class Player extends GameObject {
     }
 
     is_attack() {
+
         if (this.status === 6) return; //逝者安息
 
         this.status = 5;
+        this.vx = 0;
         this.frame_current_cnt = 0;
 
         console.log(this.$hp);
-        this.hp = Math.max(this.hp - 20, 0);
+        this.hp = Math.max(this.hp - 1, 0);
 
         this.$hp.animate({
             width: this.$hp.parent().width() * this.hp / 100
@@ -174,6 +178,45 @@ export class Player extends GameObject {
             this.vx = 0; //迁坟
             this.status = 6;
             this.frame_current_cnt = 0;
+        }
+    }
+
+    update_reset() {
+        if (this.status === 6) {
+            let me = this, you = this.root.players[1 - this.id];
+            if (me.id === 0) {
+                me.x = 200;
+                me.y = 0;
+                me.status = 3;
+                me.hp = 100;
+                me.$hp.animate({
+                    width: me.$hp.parent().width() * me.hp / 100
+                })
+
+                you.x = 900;
+                you.y = 0;
+                you.status = 3;
+                you.hp = 100;
+                you.$hp.animate({
+                    width: you.$hp.parent().width() * you.hp / 100
+                })
+            } else {
+                me.x = 900;
+                me.y = 0;
+                me.status = 3;
+                me.hp = 100;
+                me.$hp.animate({
+                    width: me.$hp.parent().width() * me.hp / 100
+                })
+
+                you.x = 200;
+                you.y = 0;
+                you.status = 3;
+                you.hp = 100;
+                you.$hp.animate({
+                    width: you.$hp.parent().width() * you.hp / 100
+                })
+            }
         }
     }
 
@@ -209,31 +252,25 @@ export class Player extends GameObject {
                 you.is_attack()
             }
         }
-    }
+    };
+
+    update_skill1() {
+
+    };
 
     update() { // 每一帧执行一次
         this.update_move();
-        console.log(this.status);
+        //console.log(this.status);
         this.update_control();
         this.update_direction();
         this.update_attack();
+        this.update_skill1();
+        this.update_reset();
         //console.log(this.status);
         this.render();
-
     }
 
     render() {
-        /*dthis.ctx.fillStyle = 'blue';
-
-        this.ctx.fillRect(this.x, this.y, this.width, this.height);
-
-        if (this.direction > 0) {
-            this.ctx.fillStyle = 'red';
-            this.ctx.fillRect(this.x + 120, this.y + 40, 100, 20);
-        } else {
-            this.ctx.fillStyle = 'red';
-            this.ctx.fillRect(this.x + this.width - 120 - 100, this.y + 40, 100, 20);
-        }*/
 
         let status = this.status;
 
@@ -283,15 +320,7 @@ export class Player extends GameObject {
             this.frame_current_cnt--;
         }
 
-        if (status === 7 && this.frame_current_cnt === obj.frame_rate * obj.frame_cnt - 1) {
-            if (this.direction > 0) {
-                this.x += 84;
-            } else {
-                this.x -= 84;
-            }
 
-            this.status = 0;
-        }
 
         this.frame_current_cnt++;
         if (this.attack_cd > 0) this.attack_cd--;

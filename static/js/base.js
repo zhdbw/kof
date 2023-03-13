@@ -1,7 +1,7 @@
 import { Nikaid } from '/static/js/player/nikaid.js'
-import { GameMap } from '/static/js/game_map/base.js'
-import { Kyo } from '/static/js/player/kyo.js'
 
+import { Kyo } from '/static/js/player/kyo.js'
+import { GameMap } from '/static/js/game_map/base.js'
 class KOF {
     constructor(id) {
         this.$kof = $('#' + id);
